@@ -1,0 +1,14 @@
+import {useState} from 'react';import {NavLink,Route,Routes,useNavigate} from 'react-router-dom';import {Toaster} from 'sonner';
+import {Menu} from 'lucide-react';import {useDB} from './services/store';import {today,dt} from './utils/fmt';
+import {Overview,Analytics} from './pages/Overview';import {Enquiries,LeadProfile} from './pages/Leads';import {Pipeline,Followups,Consultations} from './pages/Work';import {Quotations,Projects,Team,Settings} from './pages/More';
+const NAV=[['/','Overview'],['/enquiries','Enquiries'],['/pipeline','Sales Pipeline'],['/followups','Follow-ups'],['/consultations','Consultations'],['/quotations','Quotations'],['/projects','Projects'],['/analytics','Analytics'],['/team','Team'],['/settings','Settings']];
+export default function App(){const [open,setOpen]=useState(false);const nav=useNavigate();const db=useDB();const [q,setQ]=useState('');
+const due=db.followups.filter(f=>!f.done&&f.date<=today()).length;
+return <div className="min-h-screen md:flex"><Toaster richColors position="top-right"/>
+<aside className={'bg-navy text-slate-300 w-56 shrink-0 fixed md:static inset-y-0 z-40 p-3 '+(open?'':'hidden md:block')}><div className="text-white font-semibold text-lg px-2 py-3">InteriorFlow<div className="text-xs text-slate-400 font-normal">Vertex Interiors</div></div>
+{NAV.map(([to,l])=><NavLink key={to} to={to} end={to==='/'} onClick={()=>setOpen(false)} className={({isActive})=>'block px-3 py-2 rounded text-sm '+(isActive?'bg-brand text-white':'hover:bg-white/10')}>{l}</NavLink>)}</aside>
+<div className="flex-1 min-w-0"><header className="bg-white border-b px-4 py-2 flex items-center gap-3"><button className="md:hidden" onClick={()=>setOpen(!open)} aria-label="Menu"><Menu size={20}/></button>
+<input value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')nav('/enquiries?q='+encodeURIComponent(q))}} placeholder="Search enquiries, press Enter" className="border rounded px-3 py-1.5 text-sm w-full max-w-sm"/>
+<span className="ml-auto text-xs bg-amber-50 text-amber-700 px-2 py-1 rounded whitespace-nowrap">DEMO ENVIRONMENT — SAMPLE DATA</span>
+<button onClick={()=>nav('/followups')} className="text-sm whitespace-nowrap">🔔 {due}</button><span className="hidden sm:block text-xs text-slate-500">{dt(today())}</span></header>
+<main className="p-4"><Routes><Route path="/" element={<Overview/>}/><Route path="/enquiries" element={<Enquiries/>}/><Route path="/enquiries/:id" element={<LeadProfile/>}/><Route path="/pipeline" element={<Pipeline/>}/><Route path="/followups" element={<Followups/>}/><Route path="/consultations" element={<Consultations/>}/><Route path="/quotations" element={<Quotations/>}/><Route path="/projects" element={<Projects/>}/><Route path="/analytics" element={<Analytics/>}/><Route path="/team" element={<Team/>}/><Route path="/settings" element={<Settings/>}/><Route path="*" element={<Overview/>}/></Routes></main></div></div>}
